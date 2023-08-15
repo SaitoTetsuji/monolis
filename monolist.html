@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MONOLIS</title>
+<style>
+  ul {
+    list-style: none;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    margin: 10px;
+    cursor: pointer;
+  }
+  .icon {
+    width: 60px;
+    height: 60px;
+    background-color: #3498db;
+    text-align: center;
+    line-height: 60px;
+    color: white;
+    font-size: 32px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  .file-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .delete-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<h1>ファイル一覧</h1>
+<ul id="fileList">
+  <!--<li>既存ファイル1</li>
+  <li>既存ファイル2</li>-->
+</ul>
+<button id="addFileButton">＋ 新規ファイル追加</button>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const fileList = document.getElementById("fileList");
+  const addFileButton = document.getElementById("addFileButton");
+
+  addFileButton.addEventListener("click", function() {
+    const newFileName = prompt("新しいファイル名を入力してください:", "新規ファイル");
+    if (newFileName) {
+      const newFileItem = document.createElement("li");
+
+      const icon = document.createElement("div");
+      icon.classList.add("icon");
+      icon.textContent = "📄";
+      newFileItem.appendChild(icon);
+
+      const fileInfo = document.createElement("div");
+      fileInfo.classList.add("file-info");
+      fileInfo.textContent = newFileName;
+      newFileItem.appendChild(fileInfo);
+
+      const deleteButton = document.createElement("button");
+      deleteButton.classList.add("delete-button");
+      deleteButton.textContent = "削除";
+      newFileItem.appendChild(deleteButton);
+
+      newFileItem.addEventListener("click", function(event) {
+        if (event.target.classList.contains("delete-button")) {
+          newFileItem.remove();
+          return;
+        }
+    
+      // ファイル項目にクリックイベントを追加
+      newFileItem.addEventListener("click", function() {
+      const targetFilePath = "monolis.html"; // 自作したページの相対パス
+      const urlWithParameter = `${targetFilePath}?filename=${encodeURIComponent(newFileName)}`;
+      window.location.href = urlWithParameter;
+      });
+      });
+
+      fileList.appendChild(newFileItem);
+    }
+ }) ;
+});
+</script>
+</body>
+</html>

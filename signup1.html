@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="signup1.css">
+    <title>MONOLIS</title>
+</head>
+<body>
+    <div class="container">
+        <h1>新規登録</h1>
+        <form action="register.php" method="POST">
+            <label for="email">Eメールアドレス</label>
+            <input type="email@example.com" id="email@example.com" name="email@example.com" required>
+
+            <label for="email">ユーザーネーム</label>
+            <input type="username" id="username" name="username" required>
+            
+            <label for="password">パスワード</label>
+            <input type="password" id="password" name="password" required>
+            
+            <!--<button id="mailButton">メール送信</button>-->
+            <button type="submit">登録</button>
+            
+            <script src="https://monolis.f5.si/js/api_access.js"></script>
+            <script>
+                const api = new MonolisAPI("monolis.f5.si/api");
+
+                api.register('username', 'email@example.com', 'password').then(res => {
+                if(res.status === 201){
+                    // 成功の処理
+                } else if(res.status === 409){
+                     // ユーザー名またはメールアドレスがすでに登録されている場合の処理
+                } else {
+                     // その他のエラー処理
+                }
+                });
+            </script>
+            <script>
+                // 登録ボタンのクリックイベント
+                document.getElementById("mailButton").addEventListener("click", function() {
+                window.location.href = "signup2.html"; // 遷移先のHTMLファイルを指定
+                });
+            </script>
+        </form>
+    </div>
+</body>
+</html>

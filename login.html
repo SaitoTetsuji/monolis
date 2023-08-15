@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="signup1.css">
+    <title>MONOLITH</title>
+</head>
+<body>
+    <div class="container">
+        <h1>ログイン</h1>
+        <form action="register.php" method="POST">
+            <label for="email">EメールアドレスorユーザーID</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password">パスワード</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button id="Button">ログイン</button>
+            <!--<button type="submit">と入れるとフォームの送信を行うため登録の時に使う-->
+            <script>
+                // 登録ボタンのクリックイベント
+                document.getElementById("Button").addEventListener("click", function() {
+                window.location.href = "monolist.html"; // 遷移先のHTMLファイルを指定
+                });
+            </script>
+        </form>
+    </div>
+</body>
+</html>
