@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONOLIS</title>
+    <link rel="stylesheet" href="signup.css">
+    <script src="https://monolis.f5.si/js/api_access.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>新規登録</h1>
+
+        <!--<form action="register.php" method="POST">-->
+        <form id="registration-form">   
+            <label for="email">Eメールアドレス</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="email">ユーザーネーム</label>
+            <input type="username" id="username" name="username" required>
+            
+            <label for="password">パスワード</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit">登録</button>
+            </p><a href="login.html">ログイン画面へ</a></p>
+        </form>
+    
+    
+    <script>
+        const api = new MonolisAPI("monolis.f5.si/api");
+        const registrationForm = document.getElementById('registration-form');
+
+        registrationForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await api.register(username, email, password);
+
+                if (res.status === 201) {
+                    // 成功の処理（例: 登録完了メッセージを表示）
+                    //alert('会員登録が成功しました！');
+                    alert("会員登録が成功しました！")
+                    window.location.href = 'signup2.html'
+                } else if (res.status === 409) {
+                    // 重複エラーの処理
+                    alert('ユーザー名またはメールアドレスがすでに登録されています。');
+                } else {
+                    // その他のエラー処理
+                    alert('エラーが発生しました。もう一度お試しください。');
+                }
+            } catch (error) {
+                // 通信エラーの処理
+                alert('通信エラーが発生しました。もう一度お試しください。');
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

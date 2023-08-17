@@ -1,30 +1,62 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="signup1.css">
-    <title>MONOLITH</title>
+    <title>ログイン</title>
+    <link rel="stylesheet" href="signup.css">
+    <script src="https://monolis.f5.si/js/api_access.js"></script>
+
 </head>
 <body>
     <div class="container">
         <h1>ログイン</h1>
-        <form action="register.php" method="POST">
-            <label for="email">EメールアドレスorユーザーID</label>
-            <input type="email" id="email" name="email" required>
+        <form id="login-form">
+            <label for="usernameOrEmail">ユーザー名またはメールアドレス</label>
+            <input type="text" id="usernameOrEmail" name="usernameOrEmail" required>
             
             <label for="password">パスワード</label>
             <input type="password" id="password" name="password" required>
             
-            <button id="Button">ログイン</button>
-            <!--<button type="submit">と入れるとフォームの送信を行うため登録の時に使う-->
-            <script>
-                // 登録ボタンのクリックイベント
-                document.getElementById("Button").addEventListener("click", function() {
-                window.location.href = "monolist.html"; // 遷移先のHTMLファイルを指定
-                });
-            </script>
+            <button type="submit">ログイン</button>
         </form>
     </div>
+
+    <script>
+        const api = new MonolisAPI("monolis.f5.si/api");
+        const loginForm = document.getElementById('login-form');
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const usernameOrEmail = document.getElementById('usernameOrEmail').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await api.login(usernameOrEmail, password);
+
+                if (res.status === 200) {
+                    // 成功の処理
+                    //alert('ログイン成功！');
+                    // ログイン成功後、monolist.htmlに遷移
+                    window.location.href = 'monolist.html';
+                } else if (res.status === 403) {
+                    // パスワードが間違っている場合の処理
+                    alert('パスワードが間違っています。');
+                } else if (res.status === 404) {
+                    // ユーザーが見つからない場合の処理
+                    alert('ユーザーが見つかりません。');
+                } else {
+                    // その他のエラー処理
+                    alert('エラーが発生しました。もう一度お試しください。');
+                }
+            } catch (error) {
+                // 通信エラーの処理
+                alert('通信エラーが発生しました。もう一度お試しください。');
+                console.error(error);
+            }
+        });
+    </script>
 </body>
 </html>
+
