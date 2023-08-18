@@ -1,0 +1,31 @@
+ul {
+    list-style: none;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    margin: 10px;
+    cursor: pointer;
+  }
+  .icon {
+    width: 60px;
+    height: 60px;
+    background-color: #3498db;
+    text-align: center;
+    line-height: 60px;
+    color: white;
+    font-size: 32px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  .file-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .delete-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }

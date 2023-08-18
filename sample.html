@@ -1,1 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログアウト</title>
+    <script src="https://monolis.f5.si/js/api_access.js"></script>
+</head>
+<body>
+    <div class="logout">
+        <h1>ログアウト</h1>
+        <button id="logoutButton">ログアウト</button>
+    </div>
+
+    <script>
+        const api = new MonolisAPI("monolis.f5.si/api");
+        const logoutButton = document.getElementById('logoutButton');
+
+        logoutButton.addEventListener('click', async () => {
+            try {
+                const res = await api.logout();
+
+                if (res.status === 200) {
+                    // 成功の処理
+                    alert('ログアウトしました。');
+                } else {
+                    // エラー処理
+                    alert('ログアウト時にエラーが発生しました。もう一度お試しください。');
+                }
+            } catch (error) {
+                // 通信エラーの処理
+                alert('通信エラーが発生しました。もう一度お試しください。');
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
 
