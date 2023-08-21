@@ -1,7 +1,7 @@
         // ボタン要素とメニュー要素の取得
         const menuButton = document.getElementById('menu-button');
         const slideMenu = document.getElementById('slide-menu');
-        const content = document.getElementById('content');
+        const content = document.getElementById('menu');
 
         // ボタンクリック時の処理
         menuButton.addEventListener('click', () => {

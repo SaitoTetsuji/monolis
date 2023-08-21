@@ -37,8 +37,21 @@
     
     <!--エディタコンテナの作成-->
     <div id="editor">
-         <p><br></p>
+         <p id="content"></p>
     </div>
+
+    <button id="viewContentButton">内容を表示</button>
+
+    <script>
+        document.getElementById("viewContentButton").addEventListener("click", function() {
+            // "content"要素の内容を取得
+            const contentElement = document.getElementById("content");
+            const content = contentElement.textContent;
+
+            // URLパラメータに内容を追加して次のページに遷移
+            window.location.href = `editer.html?content=${encodeURIComponent(content)}`;
+        });
+    </script>
     
     <!--Quillライブラリの読み込み-->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
@@ -48,56 +61,127 @@
 
      <!--管理画面スライドメニューのコード-->
      <div id="slide-menu">
-        <h2>管理画面</h2>
+      <h2>管理画面</h2>
         
         <p>公開範囲設定<br>
-          <div>
-            <input type="checkbox" id="checkbox1" onchange="updateCheckboxes(1)">
-            <label for="checkbox1">公開</label>
-          </div>
-          <div>
-            <input type="checkbox" id="checkbox2" onchange="updateCheckboxes(2)">
-            <label for="checkbox2">非公開</label>
-          </div>
+          <label for="checkbox1">
+            <input type="checkbox" id="checkbox1" onchange="updateCheckboxes(1)"> 公開
+          </label><br>
+          <label for="checkbox2">
+            <input type="checkbox" id="checkbox2" onchange="updateCheckboxes(2)"> 非公開
+          </label><br>
+          
+          <div id="text-container" style="display: none;">
+            公開アカウント設定<br>
+            <label for="page-allowed_user_ids">公開を許可するユーザー：</label>
+            <input type="text" id="page-allowed_user_ids" required>
+            <button onclick="addItem1()">追加</button>
+            <ul id="allowed_user_ids_disp"></ul><br>
+            <label for="page-co_editor_user_ids">共同編集を可能にするユーザー：</label>
+            <input type="text" id="page-co_editor_user_idsd" required>
+            <button onclick="addItem2()">追加</button>
+            <ul id="co_editor_user_idsd_disp"></ul><br>
+        
+            <!-- 公開するユーザーのリストの追加 -->
             <script>
-              // チェックボックスの連動を制御する関数
-              function updateCheckboxes(checkboxNumber) {
+              var allowed_user_idsList = [];  // 空の配列を作成
+        
+              function addItem1() {
+                var inputElement = document.getElementById("page-allowed_user_ids");
+                var inputValue = inputElement.value;
+        
+                if (inputValue.trim() !== "") {
+                  allowed_user_idsList.push(inputValue);  // テキスト情報を配列に追加
+        
+                  var newItem = document.createElement("li");
+                  newItem.appendChild(document.createTextNode(inputValue));
+        
+                  var allowed_user_ids_disp = document.getElementById("allowed_user_ids_disp");
+                  allowed_user_ids_disp.appendChild(newItem);
+        
+                  inputElement.value = "";
+                  updateCheckboxes();
+                }
+              }
+            </script>
+        
+            <!-- 共同編集するユーザーのリストの追加 -->
+            <script>
+              var co_editor_user_idsdsList = [];  // 空の配列を作成
+        
+              function addItem2() {
+                var inputElement = document.getElementById("page-co_editor_user_idsd");
+                var inputValue = inputElement.value;
+        
+                if (inputValue.trim() !== "") {
+                  co_editor_user_idsdsList.push(inputValue);  // テキスト情報を配列に追加
+        
+                  var newItem = document.createElement("li");
+                  newItem.appendChild(document.createTextNode(inputValue));
+        
+                  var co_editor_user_idsd_disp = document.getElementById("co_editor_user_idsd_disp");
+                  co_editor_user_idsd_disp.appendChild(newItem);
+        
+                  inputElement.value = "";
+                  updateCheckboxes();
+                }
+              }
+            </script>
+              
+            公開パスワード
+            <div id="form-container">
+              <form>
+                <input type="text" id="password" placeholder="パスワードを入力" oninput="updateCheckboxes(3)">
+              </form>
+            </div>
+          </div>
+          
+          <input type="hidden" id="access_type" value="0"> <!-- 初期値は0 -->
+        
+          <script>
+            function updateCheckboxes(checkboxNumber) {
+              var textContainer = document.getElementById("text-container");
+              var passwordInput = document.getElementById("password");
               var checkbox1 = document.getElementById("checkbox1");
               var checkbox2 = document.getElementById("checkbox2");
-  
+              var allowedUserIdsInput = document.getElementById("page-allowed_user_ids");
+              var coEditorUserIdsInput = document.getElementById("page-co_editor_user_idsd");
+              var accessTypeInput = document.getElementById("access_type");
+        
               if (checkboxNumber === 1) {
-              if (checkbox1.checked) {
-                checkbox2.checked = false; // チェックボックス1にチェックがある場合、チェックボックス2を外す
-              }
+                if (checkbox1.checked) {
+                  checkbox2.checked = false;
+                  textContainer.style.display = "block";
+                  accessTypeInput.value = "0"; // チェックボックス1にチェックが入ったときに1をセット
+                } else {
+                  textContainer.style.display = "none";
+                  accessTypeInput.value = "0";
+                }
               } else if (checkboxNumber === 2) {
-              if (checkbox2.checked) {
-                checkbox1.checked = false; // チェックボックス2にチェックがある場合、チェックボックス1を外す
+                if (checkbox2.checked) {
+                  checkbox1.checked = false;
+                  textContainer.style.display = "none"; // チェックボックス2にチェックがある場合は非表示にする
+                  accessTypeInput.value = "2"; // チェックボックス2にチェックが入ったときに2をセット
+                } else {
+                  textContainer.style.display = "none";
+                  accessTypeInput.value = "0";
+                }
+              } else if (checkboxNumber === 3) {
+                if (passwordInput.value.trim() !== "") {
+                  accessTypeInput.value = "1";
+                } else {
+                  accessTypeInput.value = "0";
+                }
               }
+        
+              if (allowed_user_idsList.length > 0 || co_editor_user_idsdsList.length > 0) {
+                accessTypeInput.value = "2";
               }
-              }
-            </script>
-            <div id="text-container" style="display:none;">
-              公開アカウント設定<br>
-              公開パスワード
-              <div id="form-container">
-                  <form>
-                    <input type="text" name="textbox" placeholder="パスワードを入力">
-                  </form>
-              </div>
-            </div>
-            <script>
-              // チェックボックスの状態に応じてテキストを表示/非表示にする関数
-              function updateCheckboxes(checkboxNumber) {
-              var textContainer = document.getElementById("text-container");
-              var checkBox = document.getElementById("checkbox1");
-  
-              if (checkBox.checked) {
-                  textContainer.style.display = "block"; // チェックが入っている場合は表示する
-              } else {
-                  textContainer.style.display = "none"; // チェックが外れている場合は非表示にする              
-              }
-              }
-            </script>
+        
+              // access_typeの値をコンソールに表示
+              console.log("access_type: " + accessTypeInput.value);
+            }
+          </script>
         </p>
 
         <p>QRコード作成</p>
@@ -146,10 +230,11 @@
 
           });
         </script>
-        <button class="finish">完了</button>
+
+        
     </div>
     
-    <div id="content">
+    <div id="menu">
         <!-- メニュー表示・非表示用のボタン -->
         <button id="menu-button">←</button>
     </div>
