@@ -91,80 +91,96 @@
           updateSaveFlag();
         });
 
+        function createPage(data){
+          page = data; // ページのデータ
+          selectPublishOption(page.access_type);
+          // QRコードを描画するcanvas要素を取得
+          const qrCode = document.getElementById("qrcode")
+          qrCode.innerHTML = createQR(`https://monolis.f5.si/page.html?pageId=${page.id}`);
+
+          document.getElementById("password").value = page.password;
+
+          sunEditor = SUNEDITOR.create('content', {
+            mode: "classic",
+            value: page.content,
+            callBackSave: savePageData,
+            width: "100%",
+            height: "70vh",
+            charCounter: true,
+            buttonList: [
+                ['undo', 'redo'],
+                ['font', 'fontSize', 'formatBlock'],
+                ['paragraphStyle', 'blockquote'],
+                ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+                ['fontColor', 'hiliteColor', 'textStyle'],
+                ['removeFormat'],
+                '/', // Line break
+                ['outdent', 'indent'],
+                ['align', 'horizontalRule', 'list', 'lineHeight'],
+                ['table', 'link', 'image', 'video', 'audio' /** ,'math' */], // You must add the 'katex' library at options to use the 'math' plugin.
+                /** ['imageGallery'] */ // You must add the "imageGalleryUrl".
+                ['fullScreen', 'showBlocks', 'codeView'],
+                ['preview', 'print'],
+                ['save', 'template'],
+                /** ['dir', 'dir_ltr', 'dir_rtl'] */ // "dir": Toggle text direction, "dir_ltr": Right to Left, "dir_rtl": Left to Right
+            ],
+            codeMirror: { // Custom option
+                        src: CodeMirror,
+                        options: {}
+            },
+            pasteTagsWhitelist :'*',
+            attributesWhitelist: {
+                '???': '*', // "*" === all attributes
+                'button': 'onclick',
+                'input': 'checked|name|type|value' // Apply to input tag
+            },
+            templates: [
+                {
+                    name: 'Template-1',
+                    html: '<button onclick="console.log(`hello`);">Hello</button>'
+                },
+                {
+                    name: 'Template-2',
+                    html: '<p>HTML source2</p>'
+                }
+            ],
+            lineAttrReset: '',
+            __allowedScriptTag :true,
+            addTagsWhitelist: 'mark|canvas|label|select|option|input|button|//',
+            lang: SUNEDITOR_LANG['ja'],
+            fullPage:true
+          });
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
           // ファイル名を表示
           const filenameElement = document.getElementById("filename");
           filenameElement.textContent = filename;
 
           
-
+          
           api.getPage(pageId).then(res => {
               if(res.status === 200){
                   // 成功の処理
-                  page = res.data; // ページのデータ
-                  selectPublishOption(page.access_type);
-                  // QRコードを描画するcanvas要素を取得
-                  const qrCode = document.getElementById("qrcode")
-                  qrCode.innerHTML = createQR(`https://monolis.f5.si/page.html?pageId=${page.id}`);
-
-                  document.getElementById("password").value = page.password;
-
-                  sunEditor = SUNEDITOR.create('content', {
-                    mode: "classic",
-                    value: page.content,
-                    callBackSave: savePageData,
-                    width: "100%",
-                    height: "70vh",
-                    charCounter: true,
-                    buttonList: [
-                        ['undo', 'redo'],
-                        ['font', 'fontSize', 'formatBlock'],
-                        ['paragraphStyle', 'blockquote'],
-                        ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
-                        ['fontColor', 'hiliteColor', 'textStyle'],
-                        ['removeFormat'],
-                        '/', // Line break
-                        ['outdent', 'indent'],
-                        ['align', 'horizontalRule', 'list', 'lineHeight'],
-                        ['table', 'link', 'image', 'video', 'audio' /** ,'math' */], // You must add the 'katex' library at options to use the 'math' plugin.
-                        /** ['imageGallery'] */ // You must add the "imageGalleryUrl".
-                        ['fullScreen', 'showBlocks', 'codeView'],
-                        ['preview', 'print'],
-                        ['save', 'template'],
-                        /** ['dir', 'dir_ltr', 'dir_rtl'] */ // "dir": Toggle text direction, "dir_ltr": Right to Left, "dir_rtl": Left to Right
-                    ],
-                    codeMirror: { // Custom option
-                                src: CodeMirror,
-                                options: {}
-                    },
-                    pasteTagsWhitelist :'*',
-                    attributesWhitelist: {
-                        '???': '*', // "*" === all attributes
-                        'button': 'onclick',
-                        'input': 'checked|name|type|value' // Apply to input tag
-                    },
-                    templates: [
-                        {
-                            name: 'Template-1',
-                            html: '<button onclick="console.log(`hello`);">Hello</button>'
-                        },
-                        {
-                            name: 'Template-2',
-                            html: '<p>HTML source2</p>'
-                        }
-                    ],
-                    lineAttrReset: '',
-                    __allowedScriptTag :true,
-                    addTagsWhitelist: 'mark|canvas|label|select|option|input|button|//',
-                    lang: SUNEDITOR_LANG['ja'],
-                    fullPage:true
-                });
-
-
+                  createPage(res.page);
               } else if(res.status === 403){
                 window.location.href = `login.html`
               } else if(res.status === 404){
                 window.location.href = `list.html`
+              } else if(res.status === 503){
+                createPage({
+                    "id": null,
+                    "title": "",
+                    "content": "",
+                    "access_type": 0,
+                    "password": null,
+                    "allowed_user_ids": [],
+                    "co_editor_user_ids": [],
+                    "creator_id": null,
+                    "thumbnail" : "",
+                    "created_at": "",
+                    "updated_at": ""});
+                    filenameElement.textContent = "デバッグ用ページ（サーバに保存されません）";
               } else {
                 window.location.href = `index.html`
               }
