@@ -26,7 +26,20 @@
         const api = new MonolisAPI("monolis.f5.si/api");
         const loginForm = document.getElementById('login-form');
 
+        api.getUserInfo().then(user => {
+            if(user.status === 200){
+                // 成功の処理
+                window.location.href = 'list.html';
+            } else {
+                // エラー処理
+            }
+        });
+
+        
+
         loginForm.addEventListener('submit', async (event) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pageId = urlParams.get("id");
             event.preventDefault();
 
             const usernameOrEmail = document.getElementById('usernameOrEmail').value;
@@ -37,9 +50,14 @@
 
                 if (res.status === 200) {
                     // 成功の処理
-                    //alert('ログイン成功！');
+                    // alert('ログイン成功！');
                     // ログイン成功後、monolist.htmlに遷移
-                    window.location.href = 'monolist.html';
+                    if(pageId == "" || pageId == null){
+                        window.location.href = 'list.html';
+                    }else{
+                        window.location.href = `https://monolis.f5.si/page.html?pageId=${pageId}`;
+                    }
+                    
                 } else if (res.status === 403) {
                     // パスワードが間違っている場合の処理
                     alert('パスワードが間違っています。');

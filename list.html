@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://monolis.f5.si/js/api_access.js"></script>
+<link rel="stylesheet" href="list.css">
+<title>MONOLIS</title>
+
+
+
+</head>
+<body>
+<h1>ファイル一覧</h1>
+<ul id="fileList">
+
+</ul>
+<button id="addFileButton">＋ 新規ファイル追加</button>
+
+
+
+
+<!--ログアウトの操作-->
+<div class="logout">
+  <br>
+  <button id="logoutButton">ログアウト</button>
+</div>
+
+<script>
+  const logoutButton = document.getElementById('logoutButton');
+
+  logoutButton.addEventListener('click', async () => {
+      try {
+          const res = await api.logout();
+
+          if (res.status === 200) {
+              // 成功の処理
+              alert('ログアウトしました。');
+              window.location.href = 'index.html';
+          } else {
+              // エラー処理
+              alert('ログアウト時にエラーが発生しました。もう一度お試しください。');
+          }
+      } catch (error) {
+          // 通信エラーの処理
+          alert('通信エラーが発生しました。もう一度お試しください。');
+          console.error(error);
+      }
+  });
+</script>
+
+<!--ユーザー情報の削除-->
+<br>
+<div class="deleteUser">
+  <button id="deleteUserButton">アカウントの削除を行う</button>
+</div>
+
+<script>
+const api = new MonolisAPI("monolis.f5.si/api");
+
+const fileList = document.getElementById("fileList");
+const addFileButton = document.getElementById("addFileButton");
+
+function addItem(pageData){
+  const newFileName = pageData.title;
+  const id = pageData.id;
+  const thumbnail = pageData.thumbnail;
+  const newFileItem = document.createElement("li");
+
+  if(pageData.content == ""){
+    const icon = document.createElement("div");
+    icon.classList.add("icon");
+    icon.textContent = "📄";
+    newFileItem.appendChild(icon);
+  }else{
+    const icon = document.createElement("img");
+    icon.classList.add("icon");
+    icon.src = thumbnail;
+    newFileItem.appendChild(icon);
+  }
+
+  const fileInfo = document.createElement("div");
+  fileInfo.classList.add("file-info");
+  fileInfo.textContent = newFileName;
+  newFileItem.appendChild(fileInfo);
+
+  const deleteButton = document.createElement("button");
+  deleteButton.classList.add("delete-button");
+  deleteButton.textContent = "削除";
+  newFileItem.appendChild(deleteButton);
+
+  newFileItem.addEventListener("click", function(event) {
+    if (event.target.classList.contains("delete-button")) {
+      api.deletePage(id).then(res => {
+        if(res.status === 200){
+            // 成功の処理
+            newFileItem.remove();
+        } else if(res.status === 404){
+            // ページが見つからない、または削除権限がない場合の処理
+        } else {
+            // その他のエラー処理
+        }
+    });
+      return;
+    }
+
+  // ファイル項目にクリックイベントを追加
+  newFileItem.addEventListener("click", function() {
+  const targetFilePath = "monolis.html"; // 自作したページの相対パス
+  const urlWithParameter = `${targetFilePath}?filename=${encodeURIComponent(newFileName)}&id=${id}`;
+  window.location.href = urlWithParameter;
+  });
+  });
+
+  fileList.appendChild(newFileItem);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+
+
+  const deleteUser = document.getElementById('deleteUserButton');
+  
+            
+  deleteUser.addEventListener('click', async function() {
+    const confirmed = confirm('本当にアカウント情報を削除してもよろしいですか？');
+    if (confirmed) { 
+    try {
+      const res = await api.deleteUser();
+      if (res.status === 200) {
+          // 成功の処理
+          alert('アカウント情報を削除しました。');
+          window.location.href = 'index.html';
+      } else if (res.status === 404) {
+        // ユーザーが見つからない場合の処理
+        alert('ユーザーが見つかりません。');
+      } else {
+        // その他のエラー処理
+        alert('エラーが発生しました。もう一度お試しください。');
+      }
+    } catch (error) {
+      // 通信エラーの処理
+      alert('通信エラーが発生しました。もう一度お試しください。');
+      console.error(error);
+    }
+}});
+
+  api.getPages().then(res => {
+    if(res.status === 200){
+        // 成功の処理
+        let pages = res.data; // ページ一覧
+        for( var i=0; i<pages.length; i++ ) {
+
+          console.log( pages[i] );
+          addItem(pages[i]);
+        }
+
+    } else {
+        // エラー処理
+    }
+  });
+
+
+  addFileButton.addEventListener("click", async function() {
+    const newFileName = prompt("新しいファイル名を入力してください:", "新規ファイル");
+
+    let page = {
+      "title": newFileName,
+      "content": "",
+      "access_type": 2,
+      "password": "",
+      "allowed_user_ids": [],
+      "co_editor_user_ids": []
+    };
+
+    api.createPage(page).then(res => {
+        if(res.status === 200){
+          // 成功の処理
+          if (newFileName) {
+            addItem(res.data);
+          }
+        } else {
+          // エラー処理
+          alart(error);
+        }
+    });
+
+
+
+
+ }) ;
+
+
+ 
+});
+</script>
+</body>
+</html>
