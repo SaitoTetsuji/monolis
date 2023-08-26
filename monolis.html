@@ -18,7 +18,14 @@
     <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/src/lang/ja.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/codemirror.min.js" integrity="sha512-t5Lcu24FbQybGnoIbv1GXDx633tW0Hd4reBUx74EIq/2Q39FzskADNbjc605pQA9kkojC+8bRXhHKEXoKJs3rw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
+    <style>
+      .__se__float-center{
+        display: flex;
+        align-content: center;
+        justify-content: center;
+      }
+    </style>
 </head>
 <body>
     
@@ -42,7 +49,7 @@
         
         <script>
 
-          
+
           const urlParams = new URLSearchParams(window.location.search);
           const filename = urlParams.get("filename");
           const pageId = urlParams.get("id");
@@ -91,6 +98,66 @@
           updateSaveFlag();
         });
 
+        async function downloadImageFromHtmlText(htmlText, name="screenshot.png") {
+          // 1. HTML要素を動的に作成
+          const container = document.createElement('div');
+          container.innerHTML = htmlText;
+          document.body.appendChild(container);
+          // SunEditorのコンテナの幅を取得
+          const editorContainer = document.getElementById('editor');
+          const editorWidth = editorContainer.offsetWidth;
+
+          // 2. html2canvasを使ってHTML要素をキャンバスに変換
+          await html2canvas(container, {
+              scale:0.8
+            }).then(canvas => {
+            // 3. キャンバスを画像に変換
+            const imgData = canvas.toDataURL('image/png');
+
+            // 4. 画像をダウンロード
+            const a = document.createElement('a');
+            a.href = imgData;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // 作成したHTML要素を削除
+            document.body.removeChild(container);
+          });
+        }
+
+        let plugin_screenshot = {
+          // プラグイン名
+          name: 'Screenshot',
+          // ボタンのラベル
+          display: 'command',
+          buttonClass: 'se-code-view-enabled',
+          title: "スクリーンショット",
+          // プラグインが追加された時の処理
+          add: function (core, targetElement) {
+            const context = core.context;
+            context.Screenshot = {
+              targetButton: targetElement,
+            };
+            const titleList = {
+              en: 'Screenshot',
+              ja: 'スクリーンショット',
+            }
+            this.title = titleList[core.lang.code]
+          },
+          // ボタンがクリックされた時の処理
+          action: async function () {
+            
+            // console.log("screenshot");
+            const htmlText = sunEditor.getContents();
+            // console.log(htmlText);
+            await downloadImageFromHtmlText(htmlText);
+          },
+            
+          innerHTML: '<div><img style="width:60%;padding-top:20%;" src="data:image/svg+xml;base64,PCEtLT94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPy0tPgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMS4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+Cgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9Il94MzJfIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHN0eWxlPSJ3aWR0aDogMjU2cHg7IGhlaWdodDogMjU2cHg7IG9wYWNpdHk6IDE7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojNEI0QjRCO30KPC9zdHlsZT4KPGc+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMzc4LjQxMywwSDIwOC4yOTdoLTEzLjE4MkwxODUuOCw5LjMxNEw1Ny4wMiwxMzguMTAybC05LjMxNCw5LjMxNHYxMy4xNzZ2MjY1LjUxNAoJCWMwLDQ3LjM2LDM4LjUyOCw4NS44OTUsODUuODk2LDg1Ljg5NWgyNDQuODExYzQ3LjM1MywwLDg1Ljg4MS0zOC41MzUsODUuODgxLTg1Ljg5NVY4NS44OTZDNDY0LjI5NCwzOC41MjgsNDI1Ljc2NiwwLDM3OC40MTMsMHoKCQkgTTQzMi40OTcsNDI2LjEwNWMwLDI5Ljg3Ny0yNC4yMTQsNTQuMDkxLTU0LjA4NCw1NC4wOTFIMTMzLjYwMmMtMjkuODg0LDAtNTQuMDk4LTI0LjIxNC01NC4wOTgtNTQuMDkxVjE2MC41OTFoODMuNzE2CgkJYzI0Ljg4NSwwLDQ1LjA3Ny0yMC4xNzgsNDUuMDc3LTQ1LjA3VjMxLjgwNGgxNzAuMTE2YzI5Ljg3LDAsNTQuMDg0LDI0LjIxNCw1NC4wODQsNTQuMDkyVjQyNi4xMDV6IiBzdHlsZT0iZmlsbDogcmdiKDAsIDAsIDApOyI+PC9wYXRoPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTE2NS4yODcsMjUyLjc4NWgtMjguNTE1Yy01LjQzMiwwLTguNywzLjUzMy04LjcsOC44MjV2NzMuNzU0YzAsNi4zODgsNC4yMTgsMTAuNTk5LDEwLjA1NSwxMC41OTkKCQljNS42OTcsMCw5LjkxNC00LjIxLDkuOTE0LTEwLjU5OXYtMjIuNDA2YzAtMC41NDUsMC4yNjUtMC44MTcsMC44MS0wLjgxN2gxNi40MzZjMjAuMTA5LDAsMzIuMTg4LTEyLjIyNiwzMi4xODgtMjkuNjEyCgkJQzE5Ny40NzUsMjY0Ljg3MSwxODUuNTIxLDI1Mi43ODUsMTY1LjI4NywyNTIuNzg1eiBNMTY0LjA3MiwyOTQuODg4aC0xNS4yMjFjLTAuNTQ1LDAtMC44MS0wLjI3Mi0wLjgxLTAuODF2LTIzLjIzCgkJYzAtMC41NDUsMC4yNjUtMC44MTYsMC44MS0wLjgxNmgxNS4yMjFjOC40MiwwLDEzLjQ0OCw1LjAyNywxMy40NDgsMTIuNDk4QzE3Ny41MTksMjkwLDE3Mi40OTIsMjk0Ljg4OCwxNjQuMDcyLDI5NC44ODh6IiBzdHlsZT0iZmlsbDogcmdiKDAsIDAsIDApOyI+PC9wYXRoPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3NS4xODcsMjUxLjk2OGMtNS40MzIsMC05LjEwNCwzLjUzMi05LjEwNCw5LjY0MnY1MC41MzFoLTAuNTQ1bC0yOC4yNS01MC4zOQoJCWMtMy42NTgtNi4zODktNy40NzEtOS43ODItMTMuMTY4LTkuNzgyYy02LjgwMSwwLTExLjE0NCw0LjYyMi0xMS4xNDQsMTEuOTU0djcyLjM5OGMwLDYuMTA5LDMuNjczLDkuNjQzLDkuMTA1LDkuNjQzCgkJYzUuNDMyLDAsOS4wOS0zLjUzNCw5LjA5LTkuNjQzdi01MC4zOThoMC41NDVsMjguMjUsNTAuMjU4YzMuNjczLDYuMzgyLDcuNDcxLDkuNzgyLDEzLjE4Miw5Ljc4MgoJCWM2Ljc4NywwLDExLjE0NC00LjYyMiwxMS4xNDQtMTEuOTU0VjI2MS42MUMyODQuMjkyLDI1NS41LDI4MC42MTksMjUxLjk2OCwyNzUuMTg3LDI1MS45Njh6IiBzdHlsZT0iZmlsbDogcmdiKDAsIDAsIDApOyI+PC9wYXRoPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTM2Ni44NzgsMjkzLjgwNmgtMTkuMDE5Yy01LjE1MywwLTguNDIxLDMuMTIxLTguNDIxLDcuODc2YzAsNC43NTUsMy4yNjgsNy44NzYsOC40MjEsNy44NzZoNi4yNTYKCQljMC41NDQsMCwwLjgwOSwwLjI3MiwwLjgwOSwwLjgxNmMwLDMuNTMzLTAuMjY1LDYuNjU0LTEuMDg5LDkuMDk4Yy0xLjg5OSw1Ljg0NC03LjczNiw5LjUxLTE0LjgwMiw5LjUxCgkJYy04LjAxNiwwLTEzLjA0My0zLjkzOC0xNS4wNjgtMTAuMTg3Yy0xLjA5LTMuMzkzLTEuNDk0LTcuODc2LTEuNDk0LTE5LjgzYzAtMTEuOTUzLDAuNDA1LTE2LjI5NiwxLjQ5NC0xOS42OTYKCQljMi4wMjUtNi4zODIsNi45MjYtMTAuMzIsMTQuODAyLTEwLjMyYzUuOTc2LDAsMTAuNDU5LDEuODk5LDEzLjk5Miw2Ljc4NmMyLjcwOSwzLjgwNSw1LjQzMiw0Ljg5NSw4LjgyNiw0Ljg5NQoJCWM1LjAyNywwLDkuMDkxLTMuNjY2LDkuMDkxLTguOTY1YzAtMi4xNzEtMC42NzEtNC4wNzgtMS43Ni01Ljk3N2MtNC44ODgtOC4yODctMTUuMjA4LTE0LjM5Ny0zMC4xNDktMTQuMzk3CgkJYy0xNi40MzcsMC0yOS4yLDcuNDcxLTMzLjk2MiwyMi40MTJjLTIuMDM5LDYuNTE1LTIuNTg0LDExLjY4Mi0yLjU4NCwyNS4yNjJjMCwxMy41ODEsMC41NDUsMTguNzQsMi41ODQsMjUuMjYyCgkJYzQuNzYyLDE0Ljk0MiwxNy41MjUsMjIuNDEzLDMzLjk2MiwyMi40MTNjMTYuNDM2LDAsMjguOTItOC4yODgsMzMuNjgyLTIzLjA5YzEuNjM0LTUuMTYsMi4zMDQtMTIuNzcsMi4zMDQtMjAuOTE5di0wLjk1CgkJQzM3NC43NTQsMjk2LjY1NCwzNzEuOTA1LDI5My44MDYsMzY2Ljg3OCwyOTMuODA2eiIgc3R5bGU9ImZpbGw6IHJnYigwLCAwLCAwKTsiPjwvcGF0aD4KPC9nPgo8L3N2Zz4K"/></div>',
+        }
+
         function createPage(data){
           page = data; // ページのデータ
           selectPublishOption(page.access_type);
@@ -101,6 +168,7 @@
           document.getElementById("password").value = page.password;
 
           sunEditor = SUNEDITOR.create('content', {
+            plugins: [plugin_screenshot],
             mode: "classic",
             value: page.content,
             callBackSave: savePageData,
@@ -114,13 +182,12 @@
                 ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
                 ['fontColor', 'hiliteColor', 'textStyle'],
                 ['removeFormat'],
-                '/', // Line break
                 ['outdent', 'indent'],
                 ['align', 'horizontalRule', 'list', 'lineHeight'],
                 ['table', 'link', 'image', 'video', 'audio' /** ,'math' */], // You must add the 'katex' library at options to use the 'math' plugin.
                 /** ['imageGallery'] */ // You must add the "imageGalleryUrl".
                 ['fullScreen', 'showBlocks', 'codeView'],
-                ['preview', 'print'],
+                ['preview', 'print', 'Screenshot'],
                 ['save', 'template'],
                 /** ['dir', 'dir_ltr', 'dir_rtl'] */ // "dir": Toggle text direction, "dir_ltr": Right to Left, "dir_rtl": Left to Right
             ],
