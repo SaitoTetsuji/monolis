@@ -162,7 +162,7 @@
           api.getPage(pageId).then(res => {
               if(res.status === 200){
                   // 成功の処理
-                  createPage(res.page);
+                  createPage(res.data);
               } else if(res.status === 403){
                 window.location.href = `login.html`
               } else if(res.status === 404){
