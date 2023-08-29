@@ -4,31 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MONOLIS</title>
-    <!--エディタコンテナ内の内容の表示-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
     <!--スタイルシートの読み込み-->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://monolis.f5.si/js/api_access.js"></script>
     <script>const api = new MonolisAPI("monolis.f5.si/api");</script>
     <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
-    <!-- <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/assets/css/suneditor.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/assets/css/suneditor-contents.css" rel="stylesheet"> -->
     <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
     <!-- languages (Basic Language: English/en) -->
     <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/src/lang/ja.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/codemirror.min.js" integrity="sha512-t5Lcu24FbQybGnoIbv1GXDx633tW0Hd4reBUx74EIq/2Q39FzskADNbjc605pQA9kkojC+8bRXhHKEXoKJs3rw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
+    <style>
+      .__se__float-center{
+        display: flex;
+        align-content: center;
+        justify-content: center;
+      }
+    </style>
 </head>
 <body>
-    
     <header>
         <h1 class="title"> 
           <span id="filename" contenteditable="true"></span>
         </h1>
         <nav class="nav">
           <ul class="menu-group">
-            <li class="menu-item"><a href="#">設定</a></li>
             <li class="menu-item"><a href="list.html">ものリスト</a></li>
           </ul>
         </nav>
@@ -39,48 +40,37 @@
         display: flex;
         width: 100%;
         height: 100px;
-        background-color: Gray;
+        background-color: #81E1E7;
         align-items: center;
+        border-radius:20px 20px 0 0;
       }
       
       .title {
-        margin-right: auto;
-        margin-left: 100px;
-        font-family: serif;
+        color: #81E1E7; 
+        -webkit-text-stroke: 1px white; /* 縁取りの幅と色を指定 */
+        margin: 0 auto; /* 左右の余白を自動調整して中央に配置 */
+        text-align: center; /* テキストを中央に配置 */
+        font-family: 'Arial Rounded MT Bold', ; /* 丸みの帯びたフォントに変更 */
+        font-size: 40px; /* フォントサイズを調整 */
       }
+      
       
       .menu-item {
         list-style: none;
         display: inline-block;
         padding: 25px;
       }
+
+      
+
+      
     </style>
 
          <!--エディタコンテナの作成-->
          <div id="editor">
           <textarea id="content"></textarea>
         </div>
-        <button id="captureButton">エディタの内容をキャプチャ</button>
       
-        <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            // キャプチャボタンをクリックした時の処理
-            document.getElementById('captureButton').addEventListener('click', function() {
-              const editorElement = document.getElementById('editor');
-              
-              // エディタ内の内容を画像に変換
-              html2canvas(editorElement).then(canvas => {
-                const imgDataUrl = canvas.toDataURL();
-      
-                // 新しいページに遷移
-                const url = 'content.html' + '?img=' + encodeURIComponent(imgDataUrl);
-                window.location.href = url;
-              });
-            });
-          });
-        </script>
-        
-        
         <script>
 
           
@@ -125,6 +115,66 @@
           sunEditor.setContents(content);
         }
 
+        async function downloadImageFromHtmlText(htmlText, name="screenshot.png") {
+            // 1. HTML要素を動的に作成
+            const container = document.createElement('div');
+            container.innerHTML = htmlText;
+            document.body.appendChild(container);
+            // SunEditorのコンテナの幅を取得
+            const editorContainer = document.getElementById('editor');
+            const editorWidth = editorContainer.offsetWidth;
+
+            // 2. html2canvasを使ってHTML要素をキャンバスに変換
+            await html2canvas(container, {
+                scale:0.8
+              }).then(canvas => {
+              // 3. キャンバスを画像に変換
+              const imgData = canvas.toDataURL('image/png');
+
+              // 4. 画像をダウンロード
+              const a = document.createElement('a');
+              a.href = imgData;
+              a.download = name;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+
+              // 作成したHTML要素を削除
+              document.body.removeChild(container);
+            });
+          }
+
+          let plugin_screenshot = {
+            // プラグイン名
+            name: 'Screenshot',
+            // ボタンのラベル
+            display: 'command',
+            buttonClass: 'se-code-view-enabled',
+            title: "スクリーンショット",
+            // プラグインが追加された時の処理
+            add: function (core, targetElement) {
+              const context = core.context;
+              context.Screenshot = {
+                targetButton: targetElement,
+              };
+              const titleList = {
+                en: 'Screenshot',
+                ja: 'スクリーンショット',
+              }
+              this.title = titleList[core.lang.code]
+            },
+            // ボタンがクリックされた時の処理
+            action: async function () {
+              
+              // console.log("screenshot");
+              const htmlText = sunEditor.getContents();
+              // console.log(htmlText);
+              await downloadImageFromHtmlText(htmlText);
+            },
+              
+            innerHTML: '<div><img style="width:60%;padding-top:20%;" src="data:image/svg+xml;base64,PCEtLT94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPy0tPgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMS4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+Cgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9Il94MzJfIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHN0eWxlPSJ3aWR0aDogMjU2cHg7IGhlaWdodDogMjU2cHg7IG9wYWNpdHk6IDE7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojNEI0QjRCO30KPC9zdHlsZT4KPGc+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMzc4LjQxMywwSDIwOC4yOTdoLTEzLjE4MkwxODUuOCw5LjMxNEw1Ny4wMiwxMzguMTAybC05LjMxNCw5LjMxNHYxMy4xNzZ2MjY1LjUxNAoJCWMwLDQ3LjM2LDM4LjUyOCw4NS44OTUsODUuODk2LDg1Ljg5NWgyNDQuODExYzQ3LjM1MywwLDg1Ljg4MS0zOC41MzUsODUuODgxLTg1Ljg5NVY4NS44OTZDNDY0LjI5NCwzOC41MjgsNDI1Ljc2NiwwLDM3OC40MTMsMHoKCQkgTTQzMi40OTcsNDI2LjEwNWMwLDI5Ljg3Ny0yNC4yMTQsNTQuMDkxLTU0LjA4NCw1NC4wOTFIMTMzLjYwMmMtMjkuODg0LDAtNTQuMDk4LTI0LjIxNC01NC4wOTgtNTQuMDkxVjE2MC41OTFoODMuNzE2CgkJYzI0Ljg4NSwwLDQ1LjA3Ny0yMC4xNzgsNDUuMDc3LTQ1LjA3VjMxLjgwNGgxNzAuMTE2YzI5Ljg3LDAsNTQuMDg0LDI0LjIxNCw1NC4wODQsNTQuMDkyVjQyNi4xMDV6IiBzdHlsZT0iZmlsbDogcmdiKDAsIDAsIDApOyI+PC9wYXRoPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTE2NS4yODcsMjUyLjc4NWgtMjguNTE1Yy01LjQzMiwwLTguNywzLjUzMy04LjcsOC44MjV2NzMuNzU0YzAsNi4zODgsNC4yMTgsMTAuNTk5LDEwLjA1NSwxMC41OTkKCQljNS42OTcsMCw5LjkxNC00LjIxLDkuOTE0LTEwLjU5OXYtMjIuNDA2YzAtMC41NDUsMC4yNjUtMC44MTcsMC44MS0wLjgxN2gxNi40MzZjMjAuMTA5LDAsMzIuMTg4LTEyLjIyNiwzMi4xODgtMjkuNjEyCgkJQzE5Ny40NzUsMjY0Ljg3MSwxODUuNTIxLDI1Mi43ODUsMTY1LjI4NywyNTIuNzg1eiBNMTY0LjA3MiwyOTQuODg4aC0xNS4yMjFjLTAuNTQ1LDAtMC44MS0wLjI3Mi0wLjgxLTAuODF2LTIzLjIzCgkJYzAtMC41NDUsMC4yNjUtMC44MTYsMC44MS0wLjgxNmgxNS4yMjFjOC40MiwwLDEzLjQ0OCw1LjAyNywxMy40NDgsMTIuNDk4QzE3Ny41MTksMjkwLDE3Mi40OTIsMjk0Ljg4OCwxNjQuMDcyLDI5NC44ODh6IiBzdHlsZT0iZmlsbDogcmdiKDAsIDAsIDApOyI+PC9wYXRoPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3NS4xODcsMjUxLjk2OGMtNS40MzIsMC05LjEwNCwzLjUzMi05LjEwNCw5LjY0MnY1MC41MzFoLTAuNTQ1bC0yOC4yNS01MC4zOQoJCWMtMy42NTgtNi4zODktNy40NzEtOS43ODItMTMuMTY4LTkuNzgyYy02LjgwMSwwLTExLjE0NCw0LjYyMi0xMS4xNDQsMTEuOTU0djcyLjM5OGMwLDYuMTA5LDMuNjczLDkuNjQzLDkuMTA1LDkuNjQzCgkJYzUuNDMyLDAsOS4wOS0zLjUzNCw5LjA5LTkuNjQzdi01MC4zOThoMC41NDVsMjguMjUsNTAuMjU4YzMuNjczLDYuMzgyLDcuNDcxLDkuNzgyLDEzLjE4Miw5Ljc4MgoJCWM2Ljc4NywwLDExLjE0NC00LjYyMiwxMS4xNDQtMTEuOTU0VjI2MS42MUMyODQuMjkyLDI1NS41LDI4MC42MTksMjUxLjk2OCwyNzUuMTg3LDI1MS45Njh6IiBzdHlsZT0iZmlsbDogcmdiKDAsIDAsIDApOyI+PC9wYXRoPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTM2Ni44NzgsMjkzLjgwNmgtMTkuMDE5Yy01LjE1MywwLTguNDIxLDMuMTIxLTguNDIxLDcuODc2YzAsNC43NTUsMy4yNjgsNy44NzYsOC40MjEsNy44NzZoNi4yNTYKCQljMC41NDQsMCwwLjgwOSwwLjI3MiwwLjgwOSwwLjgxNmMwLDMuNTMzLTAuMjY1LDYuNjU0LTEuMDg5LDkuMDk4Yy0xLjg5OSw1Ljg0NC03LjczNiw5LjUxLTE0LjgwMiw5LjUxCgkJYy04LjAxNiwwLTEzLjA0My0zLjkzOC0xNS4wNjgtMTAuMTg3Yy0xLjA5LTMuMzkzLTEuNDk0LTcuODc2LTEuNDk0LTE5LjgzYzAtMTEuOTUzLDAuNDA1LTE2LjI5NiwxLjQ5NC0xOS42OTYKCQljMi4wMjUtNi4zODIsNi45MjYtMTAuMzIsMTQuODAyLTEwLjMyYzUuOTc2LDAsMTAuNDU5LDEuODk5LDEzLjk5Miw2Ljc4NmMyLjcwOSwzLjgwNSw1LjQzMiw0Ljg5NSw4LjgyNiw0Ljg5NQoJCWM1LjAyNywwLDkuMDkxLTMuNjY2LDkuMDkxLTguOTY1YzAtMi4xNzEtMC42NzEtNC4wNzgtMS43Ni01Ljk3N2MtNC44ODgtOC4yODctMTUuMjA4LTE0LjM5Ny0zMC4xNDktMTQuMzk3CgkJYy0xNi40MzcsMC0yOS4yLDcuNDcxLTMzLjk2MiwyMi40MTJjLTIuMDM5LDYuNTE1LTIuNTg0LDExLjY4Mi0yLjU4NCwyNS4yNjJjMCwxMy41ODEsMC41NDUsMTguNzQsMi41ODQsMjUuMjYyCgkJYzQuNzYyLDE0Ljk0MiwxNy41MjUsMjIuNDEzLDMzLjk2MiwyMi40MTNjMTYuNDM2LDAsMjguOTItOC4yODgsMzMuNjgyLTIzLjA5YzEuNjM0LTUuMTYsMi4zMDQtMTIuNzcsMi4zMDQtMjAuOTE5di0wLjk1CgkJQzM3NC43NTQsMjk2LjY1NCwzNzEuOTA1LDI5My44MDYsMzY2Ljg3OCwyOTMuODA2eiIgc3R5bGU9ImZpbGw6IHJnYigwLCAwLCAwKTsiPjwvcGF0aD4KPC9nPgo8L3N2Zz4K"/></div>',
+          }
+
         function createPage(data){
           page = data; // ページのデータ
           selectPublishOption(page.access_type);
@@ -135,6 +185,7 @@
           document.getElementById("password").value = page.password;
 
           sunEditor = SUNEDITOR.create('content', {
+            plugins: [plugin_screenshot],
             mode: "classic",
             value: page.content,
             callBackSave: savePageData,
@@ -148,13 +199,12 @@
                 ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
                 ['fontColor', 'hiliteColor', 'textStyle'],
                 ['removeFormat'],
-                '/', // Line break
                 ['outdent', 'indent'],
                 ['align', 'horizontalRule', 'list', 'lineHeight'],
                 ['table', 'link', 'image', 'video', 'audio' /** ,'math' */], // You must add the 'katex' library at options to use the 'math' plugin.
                 /** ['imageGallery'] */ // You must add the "imageGalleryUrl".
                 ['fullScreen', 'showBlocks', 'codeView'],
-                ['preview', 'print'],
+                ['preview', 'print', 'Screenshot'],
                 ['save', 'template'],
                 /** ['dir', 'dir_ltr', 'dir_rtl'] */ // "dir": Toggle text direction, "dir_ltr": Right to Left, "dir_rtl": Left to Right
             ],
@@ -243,33 +293,73 @@
               // URLパラメータに内容を追加して次のページに遷移
               window.location.href = `https://monolis.f5.si/page.html?pageId=${page.id}`;
           });
-      </script>
+          
+        </script>
+
+        <style>
+          #viewContentButton {
+              width: auto; /* ボタンの幅 */
+              height: auto; /* ボタンの高さ */
+              font-size: 35px; /* ボタンテキストのフォントサイズ */
+              color: #81E1E7; 
+              -webkit-text-stroke: 0.75px white; /* 縁取りの幅と色を指定 テキストカラーを白に */
+              background-color: #81E1E7; /* ボタンの背景色を変更 */
+              border: none; /* ボーダーを削除 */
+              border-radius: 0; /* ボーダーの角丸を削除 */
+              display: block; /* ブロック要素として扱う */
+              margin-top: 10px; /* 左右の余白を自動調整して中央に配置 */
+              margin-left: 10px;
+              border-radius:5px;
+          }
+        </style>
+
+
     
     <!--管理画面スライドメニューのコード-->
     <div id="slide-menu" style="right: -240px;">
-      <h2>管理画面</h2>
+      <h2 id="menu-title" style="color: white;">管理画面</h2>
         
-        <p>公開範囲設定<br>
+        <p style="color: white;">公開範囲設定<br>
           <label>
-            <input type="radio" name="publishOption" onchange="updateCheckboxes(1)"> 公開
+            <input type="radio" name="publishOption" onchange="updateCheckboxes(1)" style="color: white;"> 公開
           </label><br>
           <label>
-            <input type="radio" name="publishOption" onchange="updateCheckboxes(2)"> パスワード付き公開
+            <input type="radio" name="publishOption" onchange="updateCheckboxes(2)" style="color: white;"> パスワード付き公開
           </label><br>
           <label>
-            <input type="radio" name="publishOption" onchange="updateCheckboxes(3)"> ユーザー指定公開
+            <input type="radio" name="publishOption" onchange="updateCheckboxes(3)" style="color: white;"> ユーザー指定公開
           </label><br>
           
-          <div id="text-container" style="display: none;">
-            公開アカウント設定<br>
-            <label for="page-allowed_user_ids">公開を許可するユーザー：</label>
+          <div id="text-container" style="display: none;" >
+            <br>
+            <label for="page-allowed_user_ids" style="color: white;">公開を許可するユーザー：</label>
             <input type="text" id="page-allowed_user_ids" required>
-            <button onclick="addItem1()">追加</button>
-            <ul id="allowed_user_ids_disp"></ul><br>
-            <label for="page-co_editor_user_ids">共同編集を可能にするユーザー：</label>
+            <button id="addItem1" onclick="addItem1()">追加</button>
+            <ul style="color: white;" id="allowed_user_ids_disp"></ul><br>
+            <label for="page-co_editor_user_ids" style="color: white;">編集可能にするユーザー：</label>
             <input type="text" id="page-co_editor_user_idsd" required>
-            <button onclick="addItem2()">追加</button>
-            <ul id="co_editor_user_idsd_disp"></ul><br>
+            <button id="addItem2" onclick="addItem2()">追加</button>
+            <ul style="color: white;" id="co_editor_user_idsd_disp"></ul><br>
+
+            <style>
+              #addItem1{
+                border-radius:10px;
+                background-color: #81E1E7;
+                border-color: white;
+                color: white;
+                margin-top: 5px;
+                margin-left: 5px;
+              }
+
+              #addItem2{
+                border-radius:10px;
+                background-color: #81E1E7;
+                border-color: white;
+                color: white;
+                margin-top: 5px;
+                margin-left: 5px;
+              }
+            </style>
         
             <!-- 公開するユーザーのリストの追加 -->
             <script>
@@ -320,7 +410,7 @@
 
           </div>
           
-          <div id="form-container">
+          <div id="form-container" style="color: white;">
             公開パスワード
             <form>
               <input type="text" id="password" placeholder="パスワードを入力">
@@ -330,9 +420,6 @@
           <input type="hidden" id="access_type" value="0"> <!-- 初期値は0 -->
         
           <script>
-          // document.getElementById("password").onchange = () => {
-          //   page.password = document.getElementById("password").value
-          // };
           
           function selectPublishOption(optionNumber) {
             let radioButtons = document.getElementsByName("publishOption");
@@ -369,11 +456,6 @@
               page.access_type = "2";
             }
             
-            // if (allowed_user_idsList.length > 0 || co_editor_user_idsdsList.length > 0) {
-            //   accessTypeInput.value = "2";
-            // }
-
-            // page.access_type = accessTypeInput.value;
 
             // access_typeの値をコンソールに表示
             console.log("access_type: " + page.access_type );
@@ -382,19 +464,14 @@
           </script>
         </p>
 
-        <p>QRコード作成</p>
+        <p style="color: white;">QRコード作成</p>
         <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.2/qrcode.min.js"></script>
         <div id="qrcode"></div>
 
-        <!-- <script src="QR.js"></script>
-        <link rel="stylesheet" href="QR.css"> -->
-
+        
         <!-- CDNの場合 -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.js"></script>
-        <!-- <div class="qrblock">
-          <p class="qrcomment">QRコードで生成したい文字列を入力してください。</p>
-          <input id="isbn" type="text" name="isbn" value=""> <button id="getqrInfo" class="btn btn-default">QRコードを生成</button><br>
-        </div> -->
+        
         <div id="qrOutput">
           <canvas id="qr"></canvas>
           <div><img id="newImg"></div>
@@ -420,48 +497,22 @@
           }
           
           
-          /*document.getElementById('getqrInfo').addEventListener('click', () => {
-          // 入力された文字列を取得
-          var userInput = document.getElementById('isbn').value;
-          var query = userInput.split(' ').join('+');
-          // QRコードの生成
-          (function() {
-          var qr = new QRious({
-          element: document.getElementById('qr'),
-          // 入力した文字列でQRコード生成
-          value: `https://monolis.f5.si/page.html?pageId=${page.id}`
-          });
-          qr.background = '#FFF'; //背景色
-          qr.backgroundAlpha = 0.8; // 背景の透過率
-          qr.foreground = '#6bb6ff'; //QRコード自体の色
-          qr.foregroundAlpha = 1.0; //QRコード自体の透過率
-          qr.level = 'L'; // QRコードの誤り訂正レベル
-          qr.size = 100; // QRコードのサイズ
-          // QRコードをflexboxで表示
-          document.getElementById('qrOutput').style.display = 'flex';
-          })();
-          // png出力用コード
-          //var cvs = document.getElementById("qr");
-
-          var png = cvs.toDataURL();
-          document.getElementById("newImg").src = png;
-
-          });*/
-          
         </script>
+              
 
 
-
+      </div>
         
     </div>
     
 
     <div id="menu">
       <!-- メニュー表示・非表示用のボタン -->
-      <button id="menu-button" style="z-index: 100;">←</button>
+      <button id="menu-button" style="z-index: 100;"><</button>
     </div>
 
     <style>
+      
        /* メニューのスタイル */
        #slide-menu {
             z-index: 99;
@@ -470,36 +521,44 @@
             right: -240px; /* メニューが初めは非表示 */
             width: 200px;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-color: #81E1E7;
             padding: 20px;
             transition: right 0.3s ease;
+            border: 5px solid white; /* 枠線を追加し色を変更 */
         }
-
-        /* メニュー表示時にコンテンツを右にずらすためのスタイル */
-        /*#content {
-            margin-left: 250px;
-            transition: margin-left 0.3s ease;
-        }*/
         
         #menu-button {
             z-index: 99;
             position: fixed;
-            padding: 10px 20px;
-            font-size: 16px;
+            width: 40px; /* サイズを変更 */
+            height: 40px; /* サイズを変更 */
+            font-size: 40px;
             top: 50%;
             right: 10px;
             transform: translateY(-50%);
-            transition: right 0.3s ease;    
+            transition: right 0.3s ease, background-color 0.3s ease, border-radius 0.3s ease;  
+            background-color: #81E1E7; 
+            border-radius: 50%; /* 正円の形に */
+            cursor: pointer;
+            border: none;
+            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+    
             
         }
+
+        
     </style>
     
 
     <script>
        // ボタン要素とメニュー要素の取得
-       const menuButton = document.getElementById('menu-button');
+        const menuButton = document.getElementById('menu-button');
         const slideMenu = document.getElementById('slide-menu');
-        const content = document.getElementById('menu');
+        const content = document.getElementById('menu'); // 表示内容を取得
 
         // ボタンクリック時の処理
         menuButton.addEventListener('click', () => {
@@ -507,15 +566,16 @@
             if (slideMenu.style.right === '-240px') {
                 slideMenu.style.right = '0px';
                 menuButton.style.right = '250px';
+                menuButton.textContent = ">";
                 //content.style.marginRight = '600px';
             } else {
                 slideMenu.style.right = '-240px';
                 menuButton.style.right = '10px';
+                menuButton.textContent = "<";
                 //content.style.marginRight = '0px';
             }
         });
     </script>
-
    
 </body>
 </html>

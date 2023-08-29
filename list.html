@@ -19,7 +19,7 @@
   .icon {
     width: 60px;
     height: 60px;
-    background-color: #3498db;
+    background-color: #81E1E7;
     text-align: center;
     line-height: 60px;
     color: white;
@@ -38,24 +38,137 @@
     padding: 5px 10px;
     cursor: pointer;
   }
+  
+
 </style>
 
 </head>
 <body>
-<h1>ファイル一覧</h1>
-<ul id="fileList">
+<div id="title-container">
+  <h id="title">ものリスト</h>
+</div>
 
-</ul>
-<button id="addFileButton">＋ 新規ファイル追加</button>
+<style>
+  #title-container{
+    z-index: 99;
+    background-color: #81E1E7;
+    width:  calc(100% - 40px); ;
+    height: 80px;
+    margin: auto;
+    margin-top: 100px;
+    border-radius:20px 20px 0 0;
+  }
+
+  #title{
+    z-index: 99;
+    color: #81E1E7;
+    -webkit-text-stroke: 1px white; /* 縁取りの幅と色を指定 */
+    font-size: 50px;
+    margin-left: 20px;
+    margin-top: 50%;
+  }
+  #fileListContainer{
+    z-index: 99;
+    width: calc(100% - 40px); /* 画面いっぱいにして左右20px分余らせる */
+    height: 66vh; /* 画面の最大の3分の2の大きさ */
+    margin: auto; /* 中央寄せ */
+    border: 2px solid #81E1E7; /* 外枠を黒くかこる */
+    box-sizing: border-box; /* ボーダーを含むボックスサイズ計算 */
+    position: relative;
+    background-color: white;
+    border-radius:0 0 20px 20px;
+  }
+  #addFileButton{
+    z-index: 99;
+    width: 75px; /* ボタンの幅 */
+    height: 75px; /* ボタンの高さ */
+    border-radius: 50%; /* 正円形状にするための丸み */
+    color: #81E1E7; /* テキストの色 */
+    background-color: white;
+    font-size: 50px; /* フォントサイズ */
+    text-align: center; /* テキストを中央に配置 */
+    line-height: 50px; /* ボタンの高さと一致させるための行の高さ */
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #81E1E7; 
+    margin-top: 50px;
+    margin-left: 50px;
+  } 
+
+  .left-line {
+    z-index: -10;
+    position: absolute;
+    top: calc(100vh - 60%); /* 線の上端の位置 */
+    left: 0 ; /* 線の左端の位置 */
+    width: 550px; /* 線の長さ */
+    height: 0; /* 高さ0で線を描画 */
+    border-top: 2px solid #81E1E7; /* 線の太さと色 */
+    transform: rotate(-45deg); /* 45度回転 */
+    transform-origin: left center; /* 回転の基準点 */
+  }
+
+  .right-line {
+    z-index: -10;
+    position: absolute;
+    top: 100vh; /* 線の上端の位置 */
+    left: calc(100vw - 25%) ; /* 線の左端の位置 */
+    width: 550px; /* 線の長さ */
+    height: 0; /* 高さ0で線を描画 */
+    border-top: 2px solid #81E1E7; /* 線の太さと色 */
+    transform: rotate(-45deg); /* 45度回転 */
+    transform-origin: left center; /* 回転の基準点 */
+  }
+
+  
+
+  
+  
+</style>
+<!--<button id="addFileButton">＋ 新規ファイル追加</button><br>-->
+<div id="fileListContainer">
+  <ul id="fileList">
+    <!-- ファイルのリストアイテム -->
+  </ul>
+  <button id="addFileButton">+</button>
+</div>
+
+<div class="left-line"></div>
+<div class="right-line"></div>
+
+
 
 
 
 
 <!--ログアウトの操作-->
-<div class="logout">
-  <br>
+<div class="Button">
   <button id="logoutButton">ログアウト</button>
-</div>
+
+
+<style>
+  #logoutButton{
+    width: auto;
+    height: auto;
+    margin-top: 20px;
+    margin-left: 30px;
+    border-radius: 5px;
+    background-color: #81E1E7;
+    color: white;
+    border-color: #81E1E7;
+  }
+
+  #deleteUserButton{
+    width: auto;
+    height: auto;
+    margin-top: 10px;
+    margin-left: 20px;
+    border-radius: 5px;
+    background-color: #81E1E7;
+    color: white;
+    border-color: #81E1E7;
+  }
+</style>
+
 
 <script>
   const logoutButton = document.getElementById('logoutButton');
@@ -81,8 +194,7 @@
 </script>
 
 <!--ユーザー情報の削除-->
-<br>
-<div class="deleteUser">
+
   <button id="deleteUserButton">アカウントの削除を行う</button>
 </div>
 
@@ -134,8 +246,9 @@ function addItem(pageData){
     });
       return;
     }
+  });}
 
-  // ファイル項目にクリックイベントを追加
+  /*ファイル項目にクリックイベントを追加
   newFileItem.addEventListener("click", function() {
   const targetFilePath = "monolis.html"; // 自作したページの相対パス
   const urlWithParameter = `${targetFilePath}?filename=${encodeURIComponent(newFileName)}&id=${id}`;
@@ -144,7 +257,7 @@ function addItem(pageData){
   });
 
   fileList.appendChild(newFileItem);
-}
+}*/
 
 document.addEventListener("DOMContentLoaded", function() {
 

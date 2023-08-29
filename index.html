@@ -6,21 +6,136 @@
   <title>MONOLIS</title>
   <style>
     body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: white;
+      overflow: hidden; /* 要素が画面外にはみ出さないようにする */
+    }
+  
+    #title {
+      z-index: 99;
+      font-size: 96px;
+      color: #81E1E7;
+      text-align: center;
+    }
+  
+    #subtitle {
+      z-index: 99;
+      font-size: 36px;
+      color: #81E1E7;
+      text-align: center;
+      margin-top: 5px;
+    }
+  
+    #loginButton {
+    z-index: 99;
+    width: 297px;
+    height: 79px;
+    background-color: #81E1E7;
+    border-top: #81E1E7; 
+    border-left: #81E1E7;
+    border-right: #81E1E7;
+    border-bottom: #81E1E7;
+    border-radius: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    cursor: pointer;
+    font-size: 40px;
+    color: white;
+    -webkit-text-stroke: 0.5px white;
+    }
+  
+    #loginButton:hover {
+      background-color: #66C7D2;
+    }
+  
+    #loginButton span {
+      color: white;
+      font-size: 24px;
+    }
+  
+    #signup {
+      z-index: 99;
+      text-align: center;
+      font-size: 24px;
+      margin-top: 20px;
+    }
+
+    .shape {
+      position: absolute;
+      font-size: 96px;
+      color: #DDDDDD; /* 薄いグレー */
+    }
+
+    .square {
+      width: 96px;
+      height: 96px;
+      background-color: #DDDDDD;
+    }
+
+    .triangle {
+      width: 0;
+      height: 0;
+      border-left: 48px solid transparent;
+      border-right: 48px solid transparent;
+      border-bottom: 83.138px solid #CCCCCC;
+    }
+
+    .circle {
+      width: 96px;
+      height: 96px;
+      background-color: #BBBBBB;
+      border-radius: 50%;
+    }
+
+    .left-line {
+      z-index: 99;
+      position: absolute;
+      top: calc(100vh - 60%); /* 線の上端の位置 */
+      left: 0 ; /* 線の左端の位置 */
+      width: 800px; /* 線の長さ */
+      height: 0; /* 高さ0で線を描画 */
+      border-top: 2px solid #81E1E7; /* 線の太さと色 */
+      transform: rotate(-45deg); /* 45度回転 */
+      transform-origin: left center; /* 回転の基準点 */
+    }
+
+    .right-line {
+      z-index: 99;
+      position: absolute;
+      top: 100vh; /* 線の上端の位置 */
+      left: calc(100vw - 25%) ; /* 線の左端の位置 */
+      width: 800px; /* 線の長さ */
+      height: 0; /* 高さ0で線を描画 */
+      border-top: 2px solid #81E1E7; /* 線の太さと色 */
+      transform: rotate(-45deg); /* 45度回転 */
+      transform-origin: left center; /* 回転の基準点 */
     }
   </style>
-</head>
-<body>
-    <p>Monolis<br>
-    今あるものをリスト化して管理しよう<br>
-    
   
-    <button id="loginButton">ログイン</button><br>
-    <a href="signup.html">新規登録</a></p>
+</head>
+
+<body>
+    <div id="title">ものりす</div>
+    <div id="subtitle">今あるものをリスト化して管理しよう！</div>
+    
+   
+    <button id="loginButton">ログイン</button>
+   
+
+    <p id="signup">
+      <a href="signup.html">新規登録</a>
+    </p>
+
+
+
 
   <script>
 
@@ -30,5 +145,19 @@
     });
 
   </script>
+
+  <!-- 新しく追加する要素 -->
+  <div class="shape square" style="top: 70vh; left: 40vw;"></div>
+  <div class="shape triangle"  style="top: 40vh; left: 65vw;"></div>
+  <div class="shape circle" style="top: 20vh; left: 20vw;"></div>
+  <div class="shape square" style="top: 10vh; left: 80vw;"></div>
+  <div class="shape triangle"  style="top: 80vh; left: 10vw;"></div>
+  <div class="shape circle" style="top: 90vh; left: 70vw;"></div>
+
+  <div class="left-line"></div>
+  <div class="right-line"></div>
+
+  
+
 </body>
 </html>
