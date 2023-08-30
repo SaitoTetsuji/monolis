@@ -101,15 +101,17 @@
         async function downloadImageFromHtmlText(htmlText, name="screenshot.png") {
           // 1. HTML要素を動的に作成
           const container = document.createElement('div');
-          container.innerHTML = htmlText;
+          container.innerHTML = htmlText + "<br>";
           document.body.appendChild(container);
-          // SunEditorのコンテナの幅を取得
-          const editorContainer = document.getElementById('editor');
-          const editorWidth = editorContainer.offsetWidth;
 
           // 2. html2canvasを使ってHTML要素をキャンバスに変換
           await html2canvas(container, {
-              scale:0.8
+            windowWidth:window.screen.width,
+              width:window.screen.width,
+              scrollX:0,
+              scrollY:-window.scrollY,
+              scale:0.8,
+              x:0.0001
             }).then(canvas => {
             // 3. キャンバスを画像に変換
             const imgData = canvas.toDataURL('image/png');
